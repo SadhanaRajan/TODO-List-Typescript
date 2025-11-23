@@ -40,6 +40,9 @@ function App() {
       : 'dark'
   })
   const isDark = theme === 'dark'
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<'all' | string>('all')
+  const [priorityFilter, setPriorityFilter] = useState<'all' | TodoItem['priority']>('all')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -70,17 +73,55 @@ function App() {
     setFormOpen(false)
   }
 
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>()
+    todosState.items.forEach((todo) => {
+      if (!todo.category) return
+      todo.category
+        .split(',')
+        .map((cat) => cat.trim())
+        .filter(Boolean)
+        .forEach((cat) => set.add(cat))
+    })
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [todosState.items])
+
+  const filteredTodos = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    return todosState.items.filter((todo) => {
+      const matchesSearch = term
+        ? [todo.title, todo.description, todo.category]
+            .filter(Boolean)
+            .some((field) => field!.toLowerCase().includes(term))
+        : true
+
+      const categories = todo.category
+        ? todo.category
+            .split(',')
+            .map((cat) => cat.trim().toLowerCase())
+            .filter(Boolean)
+        : []
+      const matchesCategory =
+        categoryFilter === 'all' || categories.includes(categoryFilter.toLowerCase())
+
+      const matchesPriority =
+        priorityFilter === 'all' || todo.priority === priorityFilter
+
+      return matchesSearch && matchesCategory && matchesPriority
+    })
+  }, [categoryFilter, priorityFilter, searchTerm, todosState.items])
+
   const activeTodos = useMemo(
     () =>
-      todosState.items
+      filteredTodos
         .filter((todo) => !todo.completed)
         .sort((a, b) => a.order - b.order),
-    [todosState.items],
+    [filteredTodos],
   )
 
   const completedTodos = useMemo(
     () =>
-      todosState.items
+      filteredTodos
         .filter((todo) => todo.completed)
         .sort((a, b) => {
           if (!a.completedAt || !b.completedAt) return 0
@@ -89,7 +130,7 @@ function App() {
             new Date(a.completedAt).getTime()
           )
         }),
-    [todosState.items],
+    [filteredTodos],
   )
 
   const overdueCount = useMemo(() => {
@@ -302,6 +343,91 @@ function App() {
             <p className={`text-xs ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {completionRate}% done
             </p>
+          </div>
+          <div
+            className={`mt-6 grid gap-3 rounded-2xl border px-4 py-4 sm:grid-cols-2 lg:grid-cols-3 ${
+              isDark ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-white/60'
+            }`}
+          >
+            <label
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold shadow-sm focus-within:ring-2 focus-within:ring-emerald-200 sm:col-span-2 lg:col-span-1 ${
+                isDark
+                  ? 'bg-white/10 text-white shadow-slate-900/30'
+                  : 'bg-white/80 text-slate-700 shadow-slate-200/50'
+              }`}
+            >
+              <span className="text-xs uppercase tracking-wide text-slate-400">
+                Search
+              </span>
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Find tasks..."
+                className={`w-full bg-transparent placeholder:text-slate-400 focus:outline-none ${
+                  isDark ? 'text-white' : 'text-slate-800'
+                }`}
+              />
+              {searchTerm ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Clear search"
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition ${
+                    isDark
+                      ? 'bg-white/10 text-slate-200 hover:bg-white/20'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  }`}
+                >
+                  ×
+                </button>
+              ) : null}
+            </label>
+            <label
+              className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm font-semibold shadow-sm focus-within:ring-2 focus-within:ring-emerald-200 ${
+                isDark
+                  ? 'bg-white/10 text-white shadow-slate-900/30'
+                  : 'bg-white/80 text-slate-700 shadow-slate-200/50'
+              }`}
+            >
+              <span className="text-xs uppercase tracking-wide text-slate-400">
+                Category
+              </span>
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+                className="w-[55%] rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:outline-none"
+              >
+                <option value="all">All</option>
+                {categoryOptions.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label
+              className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm font-semibold shadow-sm focus-within:ring-2 focus-within:ring-emerald-200 ${
+                isDark
+                  ? 'bg-white/10 text-white shadow-slate-900/30'
+                  : 'bg-white/80 text-slate-700 shadow-slate-200/50'
+              }`}
+            >
+              <span className="text-xs uppercase tracking-wide text-slate-400">
+                Priority
+              </span>
+              <select
+                value={priorityFilter}
+                onChange={(event) =>
+                  setPriorityFilter(event.target.value as typeof priorityFilter)
+                }
+                className="w-[55%] rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:outline-none"
+              >
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
           </div>
         </header>
 
