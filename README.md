@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# Minimalist Todo Control Center
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local-first personal task dashboard. Add tasks, mark complete, track categories, and view progress with a light/dark theme toggle. All data stays in the browser (no backend).
 
-Currently, two official plugins are available:
+## What’s inside
+- React + TypeScript + Vite (fast dev/build)
+- Redux Toolkit (global state for todos)
+- Tailwind CSS (styling)
+- hello-pangea/dnd (installed; can be re-enabled if you want drag-and-drop later)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- Add/edit tasks with title, description, comma-separated categories, priority, and optional due date
+- Square checkboxes for completion
+- Delete confirmation with optional “don’t ask again” preference
+- Light/dark mode toggle stored in localStorage
+- Completed and active sections with quick stats and a completion bar
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting started
+1) Install dependencies  
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2) Run the dev server  
+```bash
+npm run dev
 ```
+Visit the printed localhost URL.
+
+3) Create a production build (optional)  
+```bash
+npm run build
+```
+Output lands in `dist/`.
+
+## Notes
+- All data is stored locally; clearing browser storage will reset tasks.
+- Drag-and-drop is currently disabled; if you want it back, reintroduce the hello-pangea/dnd wrappers around the active list.
